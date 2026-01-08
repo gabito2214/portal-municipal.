@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carga tu CV | Portal Municipal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="container">
+        <header class="header">
+            <a href="index.html" class="back-link">← Volver al inicio</a>
+            <h1 class="title">Únete a nuestro <span class="gradient-text">Gran Equipo</span></h1>
+            <p class="subtitle">Sube tu currículum vitae y da el primer paso.</p>
+        </header>
+
+        <section class="form-card">
+            <form id="uploadForm">
+                <div class="input-group">
+                    <label for="name">Nombre Completo</label>
+                    <input type="text" id="name" name="name" placeholder="Ej. Juan Pérez" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="juan@ejemplo.com" required>
+                </div>
+
+                <div class="upload-zone" id="dropZone">
+                    <input type="file" id="cvInput" name="cv" accept=".pdf,.doc,.docx" hidden>
+                    <div class="upload-content">
+                        <div class="icon-circle">📄</div>
+                        <p id="fileNameDisplay">Arrastra tu CV aquí o <span>haz clic para buscar</span></p>
+                        <p class="small">Formatos aceptados: PDF, DOC, DOCX</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span>Enviar Currículum</span>
+                    <div class="loader" id="loader"></div>
+                </button>
+            </form>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2026 Municipalidad - Portal de Talento</p>
+        </footer>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="cv.js"></script>
+</body>
+</html>

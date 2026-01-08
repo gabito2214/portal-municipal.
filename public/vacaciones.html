@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacaciones | Solicitar</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="container">
+        <header class="header">
+            <a href="index.html" class="back-link">← Volver al inicio</a>
+            <h1 class="title">Solicitud de <span class="gradient-text">Vacaciones</span></h1>
+        </header>
+
+        <section class="form-card">
+            <form id="vacationForm">
+                <div class="input-group">
+                    <label for="name">Nombre Completo</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="employee_id">Legajo / ID Empleado</label>
+                    <input type="text" id="employee_id" name="employee_id" placeholder="Ej. 12345" required>
+                </div>
+
+                <div class="grid-inputs">
+                    <div class="input-group">
+                        <label for="start_date">Fecha Inicio</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="end_date">Fecha Fin</label>
+                        <input type="date" id="end_date" name="end_date" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span>Enviar Solicitud</span>
+                    <div class="loader" id="loader"></div>
+                </button>
+            </form>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2026 Municipalidad - Recursos Humanos</p>
+        </footer>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const form = document.getElementById('vacationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loader = document.getElementById('loader');
+        const toast = document.getElementById('toast');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            loader.style.display = 'block';
+
+            const data = {
+                name: form.name.value,
+                employee_id: form.employee_id.value,
+                start_date: form.start_date.value,
+                end_date: form.end_date.value
+            };
+
+            try {
+                const response = await fetch('/vacations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Solicitud enviada con éxito');
+                    form.reset();
+                } else {
+                    showToast('Error: ' + result.message, true);
+                }
+            } catch (err) {
+                showToast('Error de conexión', true);
+            } finally {
+                submitBtn.disabled = false;
+                loader.style.display = 'none';
+            }
+        });
+
+        function showToast(msg, error = false) {
+            toast.textContent = msg;
+            toast.classList.toggle('error', error);
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+
+</html>

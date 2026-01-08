@@ -1,0 +1,13 @@
+﻿@echo off
+cd /d %~dp0
+echo Iniciando Portal de CV...
+echo Verificando dependencias...
+if not exist node_modules (
+    echo Instalando dependencias necesarias (esto puede tardar unos segundos)...
+    call npm install
+)
+echo Abriendo el navegador en http://localhost:3000
+start http://localhost:3000
+echo Ejecutando servidor...
+node server.js
+pause
