@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,12 +13,14 @@
             margin: 0 auto;
             padding: 2rem;
         }
+
         .tabs {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
             justify-content: center;
         }
+
         .tab-btn {
             background: var(--glass);
             border: 1px solid var(--glass-border);
@@ -29,10 +32,12 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
+
         .tab-btn.active {
             background: var(--gradient);
             border-color: transparent;
         }
+
         .data-table-container {
             background: var(--glass);
             backdrop-filter: blur(20px);
@@ -41,16 +46,20 @@
             padding: 1.5rem;
             overflow-x: auto;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             color: var(--text-main);
         }
-        th, td {
+
+        th,
+        td {
             text-align: left;
             padding: 1rem;
             border-bottom: 1px solid var(--glass-border);
         }
+
         th {
             color: var(--text-muted);
             font-weight: 600;
@@ -58,9 +67,11 @@
             font-size: 0.8rem;
             letter-spacing: 1px;
         }
+
         tr:last-child td {
             border-bottom: none;
         }
+
         .action-btn {
             background: rgba(99, 102, 241, 0.1);
             color: var(--primary);
@@ -72,10 +83,12 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
+
         .action-btn:hover {
             background: var(--primary);
             color: white;
         }
+
         .status-badge {
             padding: 0.3rem 0.6rem;
             border-radius: 6px;
@@ -86,6 +99,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="background-blobs">
         <div class="blob blob-1"></div>
@@ -95,6 +109,9 @@
     <main class="admin-container">
         <header class="header">
             <a href="index.html" class="back-link">← Volver al inicio</a>
+            <div class="logo-container">
+                <img src="img/logo.jpg" alt="Jáchal Municipio" class="logo">
+            </div>
             <h1 class="title">Panel de <span class="gradient-text">Administración</span></h1>
             <p class="subtitle">Gestión de CVs y Solicitudes de Vacaciones.</p>
         </header>
@@ -143,4 +160,5 @@
 
     <script src="admin.js"></script>
 </body>
+
 </html>
