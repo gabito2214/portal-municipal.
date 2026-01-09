@@ -1,33 +1,29 @@
-# Guía de Despliegue Permanente (PostgreSQL + Cloudinary)
+# Guía de Despliegue en Railway.app (Alternativa estable a Render)
 
-Para que tu portal municipal guarde los datos y archivos de forma **permanente** y gratuita en Render.com, sigue estos pasos:
+Para poner tu portal online de forma rápida y persistente:
 
-## 1. Configurar Base de Datos (PostgreSQL)
-1. En el Dashboard de Render, haz clic en **"New"** > **"PostgreSQL"**.
-2. Ponle un nombre (ej. `municipal-db`) y haz clic en **"Create Database"**.
-3. Una vez creada, busca la sección **"Connections"** y copia la **"External Database URL"**. La necesitaremos más adelante.
+## 1. Preparar en Railway
+1. Ve a [Railway.app](https://railway.app/) e inicia sesión con GitHub.
+2. Haz clic en **"New Project"** > **"Deploy from GitHub repo"**.
+3. Selecciona tu repositorio `portal-municipal`.
 
-## 2. Configurar Almacenamiento de Archivos (Cloudinary)
-1. Regístrate gratis en [Cloudinary](https://cloudinary.com/).
-2. En tu Dashboard de Cloudinary, verás tres valores:
-   - `Cloud Name`
-   - `API Key`
-   - `API Secret`
+## 2. Agregar Base de Datos (PostgreSQL)
+1. Una vez creado el proyecto, haz clic en el botón **"View"** de tu proyecto.
+2. Haz clic en **"Create"** (o en el signo +) y elige **"Database"** > **"PostgreSQL"**.
+3. Railway creará la base de datos automáticamente y la conectará a tu código (Railway detecta las variables de entorno `DATABASE_URL` por sí solo).
 
-## 3. Desplegar el Servicio Web en Render
-1. Sube tu código a GitHub (instrucciones en la guía anterior).
-2. Crea un nuevo **Web Service** conectado a ese repositorio.
-3. En la sección **"Environment"**, haz clic en **"Add Environment Variable"** y añade estas 5 variables:
-   - `DATABASE_URL`: (Pega la External URL de tu PostgreSQL)
-   - `CLOUDINARY_CLOUD_NAME`: (Tu Cloud Name)
-   - `CLOUDINARY_API_KEY`: (Tu API Key)
-   - `CLOUDINARY_API_SECRET`: (Tu API Secret)
-   - `PORT`: `3000`
+## 3. Configurar Almacenamiento (Cloudinary)
+1. En el dashboard de Railway, ve a la pestaña **"Variables"** de tu servicio de Node.js.
+2. Añade las variables de Cloudinary que obtuviste en su página:
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+3. (Opcional) Asegúrate de que `PORT` sea `3000`.
 
-## 4. Finalizar
-Haz clic en **"Deploy Web Service"**. Render instalará las librerías automáticamente y conectará todo.
+## 4. ¡Listo!
+Railway desplegará la página automáticamente. Podrás ver la URL pública en la sección "Deployments" o "Settings".
 
 ---
-**¿Por qué esto es mejor?**
-- **CVs Seguros**: Los archivos se guardan en Cloudinary y nunca se borran.
-- **Datos Seguros**: PostgreSQL es una base de datos real que mantiene tus solicitudes aunque el servidor se reinicie.
+**¿Por qué Railway?**
+- **Sincronización automática**: Cada vez que yo haga un cambio y lo subamos a GitHub, Railway se actualiza solo.
+- **Base de Datos integrada**: No tienes que copiar links de bases de datos externas; Railway las une automáticamente.
