@@ -24,6 +24,20 @@ Para poner tu portal online de forma rápida y persistente:
 Railway desplegará la página automáticamente. Podrás ver la URL pública en la sección "Deployments" o "Settings".
 
 ---
-**¿Por qué Railway?**
-- **Sincronización automática**: Cada vez que yo haga un cambio y lo subamos a GitHub, Railway se actualiza solo.
-- **Base de Datos integrada**: No tienes que copiar links de bases de datos externas; Railway las une automáticamente.
+
+# Guía de Despliegue en Render.com (Alternativa Gratuita)
+
+1. **Crear base de datos PostgreSQL**: En Render, ve a "New" > "PostgreSQL". Copia la "External Database URL".
+2. **Crear Web Service**: Ve a "New" > "Web Service" y conecta tu repo de GitHub.
+3. **Configurar Variables**: En la pestaña "Environment", añade:
+   - `DATABASE_URL`: (La URL que copiaste)
+   - `CLOUDINARY_CLOUD_NAME`: (De tu dashboard de Cloudinary)
+   - `CLOUDINARY_API_KEY`: (De tu dashboard de Cloudinary)
+   - `CLOUDINARY_API_SECRET`: (De tu dashboard de Cloudinary)
+4. **Deploy**: Render detectará el `package.json` y desplegará automáticamente.
+
+---
+**¿Por qué Railway o Render?**
+- **Sincronización automática**: Cada vez que se suba un cambio a GitHub, el sitio se actualiza solo.
+- **Base de Datos integrada**: No necesitas configurar servidores locales.
+- **Persistencia**: Tus archivos (CVs) estarán seguros en Cloudinary.
