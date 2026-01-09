@@ -30,16 +30,17 @@ app.use((req, res, next) => {
 });
 
 // PostgreSQL Setup
-if (!process.env.DATABASE_URL) {
-    console.error('CRITICAL: DATABASE_URL is not defined in environment variables.');
-    // In local development, you might want to switch back to SQLite or just log a warning
+const dbUrl = process.env.DATABASE_URL;
+
+if (!dbUrl) {
+    console.warn('⚠️  ADVERTENCIA: DATABASE_URL no está definido. El servidor no podrá guardar datos.');
 }
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost') ? false : {
+    connectionString: dbUrl,
+    ssl: (dbUrl && !dbUrl.includes('localhost') && !dbUrl.includes('127.0.0.1')) ? {
         rejectUnauthorized: false
-    }
+    } : false
 });
 
 // Iniciar Tablas si no existen
