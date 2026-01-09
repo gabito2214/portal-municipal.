@@ -30,9 +30,14 @@ app.use((req, res, next) => {
 });
 
 // PostgreSQL Setup
+if (!process.env.DATABASE_URL) {
+    console.error('CRITICAL: DATABASE_URL is not defined in environment variables.');
+    // In local development, you might want to switch back to SQLite or just log a warning
+}
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
+    ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost') ? false : {
         rejectUnauthorized: false
     }
 });

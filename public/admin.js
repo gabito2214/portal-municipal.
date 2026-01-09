@@ -12,6 +12,7 @@ async function fetchData() {
         renderVacations(vacations.data);
     } catch (error) {
         console.error('Error fetching admin data:', error);
+        document.getElementById('cvs-body').innerHTML = `<tr><td colspan="4" style="text-align:center; color: #ef4444;">Error al cargar datos: ${error.message}. Verificá la consola del servidor.</td></tr>`;
     }
 }
 
