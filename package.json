@@ -4,8 +4,7 @@
     "description": "Premium CV Upload Portal",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js",
-        "build": "echo 'No build step required'"
+        "start": "node server.js"
     },
     "dependencies": {
         "cloudinary": "^1.41.3",
