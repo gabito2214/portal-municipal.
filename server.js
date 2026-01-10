@@ -75,7 +75,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'municipal_portal',
-        allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png'],
+        allowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png'],
         resource_type: 'auto'
     }
 });
