@@ -191,7 +191,10 @@ app.put('/admin/vacations/:id', async (req, res) => {
 });
 
 
+
 // Export Endpoints (PDF)
+const PDFDocument = require('pdfkit');
+
 app.get('/admin/export/uploads', async (req, res) => {
     try {
         const result = await pool.query(`SELECT * FROM uploads ORDER BY upload_date DESC`);
@@ -236,7 +239,7 @@ app.get('/admin/export/vacations', async (req, res) => {
 
         items.forEach(item => {
             doc.fontSize(12).text(`Fecha Solicitud: ${new Date(item.request_date).toLocaleDateString()}`);
-            doc.text(`Nombre: ${item.name} (Legajo: ${item.employee_id})`);
+            doc.text(`Nombre: ${item.name} (CUIL: ${item.employee_id})`);
             doc.text(`Desde: ${item.start_date} - Hasta: ${item.end_date}`);
             doc.text(`Estado: ${item.status}`);
             doc.text(`--------------------------------`);
