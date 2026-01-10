@@ -75,8 +75,15 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'municipal_portal',
-        allowedFormats: ['pdf', 'doc', 'docx', 'jpg', 'png'],
         resource_type: 'auto'
+    }
+});
+
+cloudinary.api.ping((error, result) => {
+    if (error) {
+        console.error("❌ CLOUDINARY ERROR:", error);
+    } else {
+        console.log("✅ Cloudinary connected:", result);
     }
 });
 
