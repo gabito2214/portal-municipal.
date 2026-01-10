@@ -1,3 +1,5 @@
+let allCVs = [];
+
 async function fetchData() {
     try {
         const [cvReq, vacReq] = await Promise.all([
@@ -8,12 +10,25 @@ async function fetchData() {
         const cvs = await cvReq.json();
         const vacations = await vacReq.json();
 
-        renderCVs(cvs.data);
-        renderVacations(vacations.data);
+        if (cvs.success) {
+            allCVs = cvs.data;
+            renderCVs(allCVs);
+        }
+        if (vacations.success) renderVacations(vacations.data);
+
     } catch (error) {
         console.error('Error fetching admin data:', error);
         document.getElementById('cvs-body').innerHTML = `<tr><td colspan="4" style="text-align:center; color: #ef4444;">Error al cargar datos: ${error.message}. Verificá la consola del servidor.</td></tr>`;
     }
+}
+
+function filterCVs() {
+    const term = document.getElementById('filterPosition').value.toLowerCase();
+    const filtered = allCVs.filter(item => {
+        const puesto = item.job_position ? item.job_position.toLowerCase() : '';
+        return puesto.includes(term);
+    });
+    renderCVs(filtered);
 }
 
 function renderCVs(data) {
