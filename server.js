@@ -76,11 +76,13 @@ const storage = new CloudinaryStorage({
     params: async (req, file) => {
         // Remove extension from original name as Cloudinary adds it based on format
         const rawName = file.originalname.split('.').slice(0, -1).join('.');
+        const isPdf = file.mimetype === 'application/pdf';
+
         return {
             folder: 'municipal_portal',
-            resource_type: 'auto',
+            resource_type: isPdf ? 'raw' : 'auto',
             public_id: rawName,
-            format: file.originalname.split('.').pop(), // Force original extension
+            format: isPdf ? undefined : file.originalname.split('.').pop(),
             use_filename: true,
             unique_filename: false,
             access_mode: 'public'
