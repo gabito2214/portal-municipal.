@@ -23,6 +23,7 @@ function renderCVs(data) {
             <td>${new Date(item.upload_date).toLocaleDateString()}</td>
             <td>${item.name}</td>
             <td>${item.dni || '-'}</td>
+            <td>${item.job_position || '-'}</td>
             <td>${item.email}</td>
             <td><a href="${item.filename}" target="_blank" class="action-btn">Ver CV</a></td>
             <td><button onclick="deleteRecord(${item.id}, 'uploads')" class="action-btn" style="background: #ef4444; border-color: #ef4444; color: white;">Eliminar</button></td>

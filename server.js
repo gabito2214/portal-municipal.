@@ -51,14 +51,16 @@ const initDB = async () => {
             name TEXT NOT NULL,
             email TEXT NOT NULL,
             dni TEXT,
+            job_position TEXT,
             filename TEXT NOT NULL,
             upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
         try {
             await pool.query(`ALTER TABLE uploads ADD COLUMN IF NOT EXISTS dni TEXT;`);
+            await pool.query(`ALTER TABLE uploads ADD COLUMN IF NOT EXISTS job_position TEXT;`);
         } catch (e) {
-            console.log("Column dni might already exist:", e.message);
+            console.log("Columns might already exist:", e.message);
         }
 
         await pool.query(`CREATE TABLE IF NOT EXISTS vacations (
@@ -109,8 +111,8 @@ const upload = multer({ storage: storage });
 
 // API Endpoints
 app.post('/upload', upload.single('cv'), async (req, res) => {
-    const { name, email, dni } = req.body;
-    if (!name || !email || !dni || !req.file) {
+    const { name, email, dni, job_position } = req.body;
+    if (!name || !email || !dni || !job_position || !req.file) {
         return res.status(400).json({ success: false, message: 'Faltan campos obligatorios' });
     }
 
@@ -119,8 +121,8 @@ app.post('/upload', upload.single('cv'), async (req, res) => {
 
     try {
         if (!pool) throw new Error("No hay conexión a la base de datos");
-        const query = `INSERT INTO uploads (name, email, dni, filename) VALUES ($1, $2, $3, $4)`;
-        await pool.query(query, [name, email, dni, filename]);
+        const query = `INSERT INTO uploads (name, email, dni, job_position, filename) VALUES ($1, $2, $3, $4, $5)`;
+        await pool.query(query, [name, email, dni, job_position, filename]);
         res.json({ success: true, message: '¡CV subido a la nube correctamente!' });
     } catch (err) {
         console.error("❌ UPLOAD ERROR FULL DETAILS:", err);
