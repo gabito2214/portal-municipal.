@@ -73,9 +73,17 @@ initDB();
 // Cloudinary Storage Config
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'municipal_portal',
-        resource_type: 'auto'
+    params: async (req, file) => {
+        // Remove extension from original name as Cloudinary adds it based on format
+        const rawName = file.originalname.split('.').slice(0, -1).join('.');
+        return {
+            folder: 'municipal_portal',
+            resource_type: 'auto',
+            public_id: rawName,
+            format: file.originalname.split('.').pop(), // Force original extension
+            use_filename: true,
+            unique_filename: false
+        };
     }
 });
 
@@ -100,11 +108,16 @@ app.post('/upload', upload.single('cv'), async (req, res) => {
     const filename = req.file.path;
 
     try {
+        if (!pool) throw new Error("No hay conexión a la base de datos");
         const query = `INSERT INTO uploads (name, email, filename) VALUES ($1, $2, $3)`;
         await pool.query(query, [name, email, filename]);
         res.json({ success: true, message: '¡CV subido a la nube correctamente!' });
     } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
+        console.error("❌ UPLOAD ERROR FULL DETAILS:", err);
+        res.status(500).json({
+            success: false,
+            message: `Error interno: ${err.message}. Revisa los logs del servidor.`
+        });
     }
 });
 
