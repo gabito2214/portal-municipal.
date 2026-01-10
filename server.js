@@ -177,24 +177,45 @@ app.delete('/admin/vacations/:id', async (req, res) => {
     }
 });
 
-// Export Endpoints (Simple CSV)
+// Update Status Endpoint
+app.put('/admin/vacations/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        await pool.query('UPDATE vacations SET status = $1 WHERE id = $2', [status, id]);
+        res.json({ success: true, message: 'Estado actualizado' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+
+// Export Endpoints (PDF)
 app.get('/admin/export/uploads', async (req, res) => {
     try {
         const result = await pool.query(`SELECT * FROM uploads ORDER BY upload_date DESC`);
         const items = result.rows;
 
-        if (!items.length) return res.send("");
+        const doc = new PDFDocument();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=curriculums.pdf');
 
-        const header = "ID,Fecha,Nombre,Email,Archivo URL\n";
-        const rows = items.map(item => {
-            return `${item.id},"${item.upload_date}","${item.name}","${item.email}","${item.filename}"`;
-        }).join("\n");
+        doc.pipe(res);
 
-        res.header('Content-Type', 'text/csv');
-        res.attachment('curriculums.csv');
-        res.send(header + rows);
+        doc.fontSize(20).text('Reporte de Curriculums', { align: 'center' });
+        doc.moveDown();
+
+        items.forEach(item => {
+            doc.fontSize(12).text(`Fecha: ${new Date(item.upload_date).toLocaleDateString()}`);
+            doc.text(`Nombre: ${item.name}`);
+            doc.text(`Email: ${item.email}`);
+            doc.text(`--------------------------------`);
+            doc.moveDown(0.5);
+        });
+
+        doc.end();
     } catch (err) {
-        res.status(500).send("Error exportando datos");
+        res.status(500).send("Error generando PDF");
     }
 });
 
@@ -203,18 +224,27 @@ app.get('/admin/export/vacations', async (req, res) => {
         const result = await pool.query(`SELECT * FROM vacations ORDER BY request_date DESC`);
         const items = result.rows;
 
-        if (!items.length) return res.send("");
+        const doc = new PDFDocument();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=vacaciones.pdf');
 
-        const header = "ID,Fecha Solicitud,Nombre,Legajo,Inicio,Fin,Estado\n";
-        const rows = items.map(item => {
-            return `${item.id},"${item.request_date}","${item.name}","${item.employee_id}","${item.start_date}","${item.end_date}","${item.status}"`;
-        }).join("\n");
+        doc.pipe(res);
 
-        res.header('Content-Type', 'text/csv');
-        res.attachment('vacaciones.csv');
-        res.send(header + rows);
+        doc.fontSize(20).text('Solicitudes de Vacaciones', { align: 'center' });
+        doc.moveDown();
+
+        items.forEach(item => {
+            doc.fontSize(12).text(`Fecha Solicitud: ${new Date(item.request_date).toLocaleDateString()}`);
+            doc.text(`Nombre: ${item.name} (Legajo: ${item.employee_id})`);
+            doc.text(`Desde: ${item.start_date} - Hasta: ${item.end_date}`);
+            doc.text(`Estado: ${item.status}`);
+            doc.text(`--------------------------------`);
+            doc.moveDown(0.5);
+        });
+
+        doc.end();
     } catch (err) {
-        res.status(500).send("Error exportando datos");
+        res.status(500).send("Error generando PDF");
     }
 });
 

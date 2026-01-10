@@ -38,8 +38,11 @@ function renderVacations(data) {
             <td>${item.employee_id}</td>
             <td>${item.start_date}</td>
             <td>${item.end_date}</td>
-            <td><span class="status-badge">${item.status}</span></td>
-            <td><button onclick="deleteRecord(${item.id}, 'vacations')" class="action-btn" style="background: #ef4444; border-color: #ef4444; color: white;">Eliminar</button></td>
+            <td><span class="status-badge ${item.status === 'Aprobado' ? 'approved' : 'pending'}">${item.status}</span></td>
+            <td class="actions-cell">
+                ${item.status !== 'Aprobado' ? `<button onclick="updateStatus(${item.id}, 'Aprobado')" class="action-btn success" title="Aprobar">✓</button>` : ''}
+                <button onclick="deleteRecord(${item.id}, 'vacations')" class="action-btn danger" title="Eliminar">🗑</button>
+            </td>
         </tr>
     `).join('');
 }
@@ -84,6 +87,28 @@ async function deleteRecord(id, type) {
 
 function exportData(type) {
     window.location.href = `/admin/export/${type}`;
+}
+
+// Status Update
+async function updateStatus(id, status) {
+    if (!confirm(`¿Cambiar estado a "${status}"?`)) return;
+
+    try {
+        const res = await fetch(`/admin/vacations/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            fetchData(); // Reload
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error de conexión');
+    }
 }
 
 // Initial fetch
