@@ -82,7 +82,8 @@ const storage = new CloudinaryStorage({
             public_id: rawName,
             format: file.originalname.split('.').pop(), // Force original extension
             use_filename: true,
-            unique_filename: false
+            unique_filename: false,
+            access_mode: 'public'
         };
     }
 });
