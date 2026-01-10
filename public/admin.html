@@ -116,6 +116,11 @@
             <p class="subtitle">Gestión de CVs y Solicitudes de Vacaciones.</p>
         </header>
 
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button onclick="exportData('uploads')" class="action-btn" style="background: #10b981; color: white; border: none; margin-right: 1rem;">⬇ Descargar Excel (CVs)</button>
+            <button onclick="exportData('vacations')" class="action-btn" style="background: #10b981; color: white; border: none;">⬇ Descargar Excel (Vacaciones)</button>
+        </div>
+
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('cvs')">Curriculums</button>
             <button class="tab-btn" onclick="switchTab('vacations')">Vacaciones</button>
@@ -130,6 +135,7 @@
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Currículum</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="cvs-body">
@@ -148,6 +154,7 @@
                             <th>Inicio</th>
                             <th>Fin</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="vacations-body">

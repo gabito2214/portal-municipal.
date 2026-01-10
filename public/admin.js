@@ -24,6 +24,7 @@ function renderCVs(data) {
             <td>${item.name}</td>
             <td>${item.email}</td>
             <td><a href="${item.filename}" target="_blank" class="action-btn">Ver CV</a></td>
+            <td><button onclick="deleteRecord(${item.id}, 'uploads')" class="action-btn" style="background: #ef4444; border-color: #ef4444; color: white;">Eliminar</button></td>
         </tr>
     `).join('');
 }
@@ -38,6 +39,7 @@ function renderVacations(data) {
             <td>${item.start_date}</td>
             <td>${item.end_date}</td>
             <td><span class="status-badge">${item.status}</span></td>
+            <td><button onclick="deleteRecord(${item.id}, 'vacations')" class="action-btn" style="background: #ef4444; border-color: #ef4444; color: white;">Eliminar</button></td>
         </tr>
     `).join('');
 }
@@ -58,6 +60,30 @@ function switchTab(tab) {
         btns[0].classList.remove('active');
         btns[1].classList.add('active');
     }
+}
+
+// Actions
+async function deleteRecord(id, type) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) return;
+
+    try {
+        const res = await fetch(`/admin/${type}/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+
+        if (result.success) {
+            alert('Eliminado correctamente');
+            fetchData(); // Reload table
+        } else {
+            alert('Error al eliminar: ' + result.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error de conexión');
+    }
+}
+
+function exportData(type) {
+    window.location.href = `/admin/export/${type}`;
 }
 
 // Initial fetch

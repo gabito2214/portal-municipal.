@@ -155,6 +155,69 @@ app.get('/admin/vacations', async (req, res) => {
     }
 });
 
+// Delete Endpoints
+app.delete('/admin/uploads/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Optional: Delete from Cloudinary using public_id if stored, or just DB record
+        await pool.query('DELETE FROM uploads WHERE id = $1', [id]);
+        res.json({ success: true, message: 'Registro eliminado' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete('/admin/vacations/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM vacations WHERE id = $1', [id]);
+        res.json({ success: true, message: 'Solicitud eliminada' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Export Endpoints (Simple CSV)
+app.get('/admin/export/uploads', async (req, res) => {
+    try {
+        const result = await pool.query(`SELECT * FROM uploads ORDER BY upload_date DESC`);
+        const items = result.rows;
+
+        if (!items.length) return res.send("");
+
+        const header = "ID,Fecha,Nombre,Email,Archivo URL\n";
+        const rows = items.map(item => {
+            return `${item.id},"${item.upload_date}","${item.name}","${item.email}","${item.filename}"`;
+        }).join("\n");
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment('curriculums.csv');
+        res.send(header + rows);
+    } catch (err) {
+        res.status(500).send("Error exportando datos");
+    }
+});
+
+app.get('/admin/export/vacations', async (req, res) => {
+    try {
+        const result = await pool.query(`SELECT * FROM vacations ORDER BY request_date DESC`);
+        const items = result.rows;
+
+        if (!items.length) return res.send("");
+
+        const header = "ID,Fecha Solicitud,Nombre,Legajo,Inicio,Fin,Estado\n";
+        const rows = items.map(item => {
+            return `${item.id},"${item.request_date}","${item.name}","${item.employee_id}","${item.start_date}","${item.end_date}","${item.status}"`;
+        }).join("\n");
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment('vacaciones.csv');
+        res.send(header + rows);
+    } catch (err) {
+        res.status(500).send("Error exportando datos");
+    }
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error('Error:', err);
