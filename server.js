@@ -211,12 +211,36 @@ app.get('/admin/export/uploads', async (req, res) => {
         doc.fontSize(20).text('Reporte de Curriculums', { align: 'center' });
         doc.moveDown();
 
+        // Table Constants
+        const startY = doc.y;
+        const colFecha = 50;
+        const colNombre = 150;
+        const colEmail = 350;
+
+        // Headers
+        doc.fontSize(12).font('Helvetica-Bold');
+        doc.text('Fecha', colFecha, startY);
+        doc.text('Nombre', colNombre, startY);
+        doc.text('Email', colEmail, startY);
+
+        doc.moveTo(50, startY + 15).lineTo(550, startY + 15).stroke();
+        doc.moveDown();
+
+        // Rows
+        doc.font('Helvetica').fontSize(10);
+        let currentY = doc.y + 10;
+
         items.forEach(item => {
-            doc.fontSize(12).text(`Fecha: ${new Date(item.upload_date).toLocaleDateString()}`);
-            doc.text(`Nombre: ${item.name}`);
-            doc.text(`Email: ${item.email}`);
-            doc.text(`--------------------------------`);
-            doc.moveDown(0.5);
+            if (currentY > 700) { // New Page
+                doc.addPage();
+                currentY = 50;
+            }
+
+            doc.text(new Date(item.upload_date).toLocaleDateString(), colFecha, currentY);
+            doc.text(item.name.substring(0, 30), colNombre, currentY); // Truncate name
+            doc.text(item.email, colEmail, currentY);
+
+            currentY += 20;
         });
 
         doc.end();
@@ -239,13 +263,45 @@ app.get('/admin/export/vacations', async (req, res) => {
         doc.fontSize(20).text('Solicitudes de Vacaciones', { align: 'center' });
         doc.moveDown();
 
+        // Table Constants
+        const startY = doc.y;
+        const colFecha = 30;
+        const colNombre = 110;
+        const colCuil = 250;
+        const colDesde = 330;
+        const colHasta = 400;
+        const colEstado = 480;
+
+        // Headers
+        doc.fontSize(10).font('Helvetica-Bold');
+        doc.text('Fecha', colFecha, startY);
+        doc.text('Nombre', colNombre, startY);
+        doc.text('CUIL', colCuil, startY);
+        doc.text('Inicio', colDesde, startY);
+        doc.text('Fin', colHasta, startY);
+        doc.text('Estado', colEstado, startY);
+
+        doc.moveTo(30, startY + 15).lineTo(580, startY + 15).stroke();
+        doc.moveDown();
+
+        // Rows
+        doc.font('Helvetica').fontSize(9);
+        let currentY = doc.y + 10;
+
         items.forEach(item => {
-            doc.fontSize(12).text(`Fecha Solicitud: ${new Date(item.request_date).toLocaleDateString()}`);
-            doc.text(`Nombre: ${item.name} (CUIL: ${item.employee_id})`);
-            doc.text(`Desde: ${item.start_date} - Hasta: ${item.end_date}`);
-            doc.text(`Estado: ${item.status}`);
-            doc.text(`--------------------------------`);
-            doc.moveDown(0.5);
+            if (currentY > 700) {
+                doc.addPage();
+                currentY = 50;
+            }
+
+            doc.text(new Date(item.request_date).toLocaleDateString(), colFecha, currentY);
+            doc.text(item.name.substring(0, 25), colNombre, currentY);
+            doc.text(item.employee_id, colCuil, currentY);
+            doc.text(item.start_date, colDesde, currentY);
+            doc.text(item.end_date, colHasta, currentY);
+            doc.text(item.status, colEstado, currentY);
+
+            currentY += 20;
         });
 
         doc.end();
