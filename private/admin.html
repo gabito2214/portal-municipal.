@@ -108,7 +108,12 @@
 
     <main class="admin-container">
         <header class="header">
-            <a href="index.html" class="back-link">← Volver al inicio</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <a href="index.html" class="back-link">← Volver al inicio</a>
+                <button onclick="logout()" class="action-btn"
+                    style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444;">Cerrar
+                    Sesión</button>
+            </div>
             <div class="logo-container">
                 <img src="img/logo.jpg" alt="Jáchal Municipio" class="logo">
             </div>
@@ -134,6 +139,8 @@
                 <div class="table-actions" style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
                     <input type="text" id="filterPosition" placeholder="Filtrar por puesto..." onkeyup="filterCVs()"
                         style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc; flex: 1; max-width: 300px;">
+                    <input type="text" id="filterTitle" placeholder="Filtrar por título..." onkeyup="filterCVs()"
+                        style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc; flex: 1; max-width: 300px;">
                 </div>
                 <table>
                     <thead>
@@ -142,6 +149,7 @@
                             <th>Nombre</th>
                             <th>DNI</th>
                             <th>Puesto</th>
+                            <th>Título</th>
                             <th>Email</th>
                             <th>Currículum</th>
                             <th>Acciones</th>
@@ -174,7 +182,7 @@
         </section>
     </main>
 
-    <script src="admin.js"></script>
+    <script src="/private/admin.js"></script>
 </body>
 
 </html>

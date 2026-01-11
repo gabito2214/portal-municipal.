@@ -7,6 +7,11 @@ async function fetchData() {
             fetch('/admin/vacations')
         ]);
 
+        if (cvReq.status === 401 || vacReq.status === 401) {
+            window.location.href = '/login.html';
+            return;
+        }
+
         const cvs = await cvReq.json();
         const vacations = await vacReq.json();
 
@@ -23,25 +28,29 @@ async function fetchData() {
 }
 
 function filterCVs() {
-    const term = document.getElementById('filterPosition').value.toLowerCase();
+    const termPosition = document.getElementById('filterPosition').value.toLowerCase();
+    const termTitle = document.getElementById('filterTitle').value.toLowerCase();
+
     const filtered = allCVs.filter(item => {
         const puesto = item.job_position ? item.job_position.toLowerCase() : '';
-        return puesto.includes(term);
+        const titulo = item.academic_title ? item.academic_title.toLowerCase() : '';
+
+        return puesto.includes(termPosition) && titulo.includes(termTitle);
     });
     renderCVs(filtered);
 }
 
 function renderCVs(data) {
-    const body = document.getElementById('cvs-body');
     body.innerHTML = data.map(item => `
         <tr>
-            <td>${new Date(item.upload_date).toLocaleDateString()}</td>
-            <td>${item.name}</td>
-            <td>${item.dni || '-'}</td>
-            <td>${item.job_position || '-'}</td>
-            <td>${item.email}</td>
-            <td><a href="${item.filename}" target="_blank" class="action-btn">Ver CV</a></td>
-            <td><button onclick="deleteRecord(${item.id}, 'uploads')" class="action-btn" style="background: #ef4444; border-color: #ef4444; color: white;">Eliminar</button></td>
+            <td data-label="Fecha">${new Date(item.upload_date).toLocaleDateString()}</td>
+            <td data-label="Nombre">${item.name}</td>
+            <td data-label="DNI">${item.dni || '-'}</td>
+            <td data-label="Puesto">${item.job_position || '-'}</td>
+            <td data-label="Título">${item.academic_title || '-'}</td>
+            <td data-label="Email">${item.email}</td>
+            <td data-label="Currículum"><a href="${item.filename}" target="_blank" class="action-btn">Ver CV</a></td>
+            <td data-label="Acciones"><button onclick="deleteRecord(${item.id}, 'uploads')" class="action-btn" style="background: #ef4444; border-color: #ef4444; color: white;">Eliminar</button></td>
         </tr>
     `).join('');
 }
@@ -50,13 +59,13 @@ function renderVacations(data) {
     const body = document.getElementById('vacations-body');
     body.innerHTML = data.map(item => `
         <tr>
-            <td>${new Date(item.request_date).toLocaleDateString()}</td>
-            <td>${item.name}</td>
-            <td>${item.employee_id}</td>
-            <td>${item.start_date}</td>
-            <td>${item.end_date}</td>
-            <td><span class="status-badge ${item.status === 'Aprobado' ? 'approved' : 'pending'}">${item.status}</span></td>
-            <td class="actions-cell">
+            <td data-label="Fecha">${new Date(item.request_date).toLocaleDateString()}</td>
+            <td data-label="Nombre">${item.name}</td>
+            <td data-label="CUIL">${item.employee_id}</td>
+            <td data-label="Inicio">${item.start_date}</td>
+            <td data-label="Fin">${item.end_date}</td>
+            <td data-label="Estado"><span class="status-badge ${item.status === 'Aprobado' ? 'approved' : 'pending'}">${item.status}</span></td>
+            <td data-label="Acciones" class="actions-cell">
                 ${item.status !== 'Aprobado' ? `<button onclick="updateStatus(${item.id}, 'Aprobado')" class="action-btn success" title="Aprobar">✓</button>` : ''}
                 <button onclick="deleteRecord(${item.id}, 'vacations')" class="action-btn danger" title="Eliminar">🗑</button>
             </td>
@@ -104,6 +113,17 @@ async function deleteRecord(id, type) {
 
 function exportData(type) {
     window.location.href = `/admin/export/${type}`;
+}
+
+async function logout() {
+    if (!confirm('¿Cerrar sesión?')) return;
+    try {
+        await fetch('/api/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login.html';
+    }
 }
 
 // Status Update

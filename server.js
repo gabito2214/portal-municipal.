@@ -8,6 +8,10 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors');
 const fs = require('fs');
 
+// Simple In-Memory Session Store
+const sessions = new Map();
+const SESSION_COOKIE_NAME = 'admin_session';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -21,7 +25,36 @@ cloudinary.config({
 // Middleware
 app.use(cors());
 app.use(express.json());
+// Middleware to serve static files from public, except admin ones which are now moved
 app.use(express.static('public'));
+
+// Custom Auth Middleware
+const checkAuth = (req, res, next) => {
+    const sessionId = req.headers.authorization || getCookie(req, SESSION_COOKIE_NAME);
+    if (sessions.has(sessionId)) {
+        next();
+    } else {
+        res.status(401).json({ success: false, message: 'No autorizado' });
+    }
+};
+
+function getCookie(req, name) {
+    const dc = req.headers.cookie;
+    if (!dc) return null;
+    const prefix = name + "=";
+    let begin = dc.indexOf("; " + prefix);
+    if (begin == -1) {
+        begin = dc.indexOf(prefix);
+        if (begin != 0) return null;
+    } else {
+        begin += 2;
+    }
+    let end = dc.indexOf(";", begin);
+    if (end == -1) {
+        end = dc.length;
+    }
+    return decodeURI(dc.substring(begin + prefix.length, end));
+}
 
 // Request Logging
 app.use((req, res, next) => {
@@ -59,6 +92,7 @@ const initDB = async () => {
         try {
             await pool.query(`ALTER TABLE uploads ADD COLUMN IF NOT EXISTS dni TEXT;`);
             await pool.query(`ALTER TABLE uploads ADD COLUMN IF NOT EXISTS job_position TEXT;`);
+            await pool.query(`ALTER TABLE uploads ADD COLUMN IF NOT EXISTS academic_title TEXT;`);
         } catch (e) {
             console.log("Columns might already exist:", e.message);
         }
@@ -111,8 +145,8 @@ const upload = multer({ storage: storage });
 
 // API Endpoints
 app.post('/upload', upload.single('cv'), async (req, res) => {
-    const { name, email, dni, job_position } = req.body;
-    if (!name || !email || !dni || !job_position || !req.file) {
+    const { name, email, dni, job_position, academic_title } = req.body;
+    if (!name || !email || !dni || !job_position || !academic_title || !req.file) {
         return res.status(400).json({ success: false, message: 'Faltan campos obligatorios' });
     }
 
@@ -121,8 +155,8 @@ app.post('/upload', upload.single('cv'), async (req, res) => {
 
     try {
         if (!pool) throw new Error("No hay conexión a la base de datos");
-        const query = `INSERT INTO uploads (name, email, dni, job_position, filename) VALUES ($1, $2, $3, $4, $5)`;
-        await pool.query(query, [name, email, dni, job_position, filename]);
+        const query = `INSERT INTO uploads (name, email, dni, job_position, academic_title, filename) VALUES ($1, $2, $3, $4, $5, $6)`;
+        await pool.query(query, [name, email, dni, job_position, academic_title, filename]);
         res.json({ success: true, message: '¡CV subido a la nube correctamente!' });
     } catch (err) {
         console.error("❌ UPLOAD ERROR FULL DETAILS:", err);
@@ -148,8 +182,47 @@ app.post('/vacations', async (req, res) => {
     }
 });
 
-// Admin Endpoints
-app.get('/admin/uploads', async (req, res) => {
+// Auth Endpoints
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'personal' && password === 'RRHH2026') {
+        const sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        sessions.set(sessionId, { user: username, expires: Date.now() + 3600000 });
+        res.cookie(SESSION_COOKIE_NAME, sessionId, { httpOnly: true, maxAge: 3600000 });
+        res.json({ success: true, sessionId });
+    } else {
+        res.status(401).json({ success: false, message: 'Credenciales inválidas' });
+    }
+});
+
+app.post('/api/logout', (req, res) => {
+    const sessionId = getCookie(req, SESSION_COOKIE_NAME);
+    if (sessionId) sessions.delete(sessionId);
+    res.clearCookie(SESSION_COOKIE_NAME);
+    res.json({ success: true });
+});
+
+// Serve Private Files
+app.get('/panel-admin', (req, res) => {
+    const sessionId = getCookie(req, SESSION_COOKIE_NAME);
+    if (sessions.has(sessionId)) {
+        res.sendFile(path.join(__dirname, 'private', 'admin.html'));
+    } else {
+        res.redirect('/login.html');
+    }
+});
+
+app.get('/private/admin.js', (req, res) => {
+    const sessionId = getCookie(req, SESSION_COOKIE_NAME);
+    if (sessions.has(sessionId)) {
+        res.sendFile(path.join(__dirname, 'private', 'admin.js'));
+    } else {
+        res.status(401).send('No autorizado');
+    }
+});
+
+// Protected Admin Endpoints
+app.get('/admin/uploads', checkAuth, async (req, res) => {
     try {
         const result = await pool.query(`SELECT * FROM uploads ORDER BY upload_date DESC`);
         res.json({ success: true, data: result.rows });
@@ -158,7 +231,7 @@ app.get('/admin/uploads', async (req, res) => {
     }
 });
 
-app.get('/admin/vacations', async (req, res) => {
+app.get('/admin/vacations', checkAuth, async (req, res) => {
     try {
         const result = await pool.query(`SELECT * FROM vacations ORDER BY request_date DESC`);
         res.json({ success: true, data: result.rows });
@@ -168,7 +241,7 @@ app.get('/admin/vacations', async (req, res) => {
 });
 
 // Delete Endpoints
-app.delete('/admin/uploads/:id', async (req, res) => {
+app.delete('/admin/uploads/:id', checkAuth, async (req, res) => {
     try {
         const { id } = req.params;
         // Optional: Delete from Cloudinary using public_id if stored, or just DB record
@@ -179,7 +252,7 @@ app.delete('/admin/uploads/:id', async (req, res) => {
     }
 });
 
-app.delete('/admin/vacations/:id', async (req, res) => {
+app.delete('/admin/vacations/:id', checkAuth, async (req, res) => {
     try {
         const { id } = req.params;
         await pool.query('DELETE FROM vacations WHERE id = $1', [id]);
@@ -190,7 +263,7 @@ app.delete('/admin/vacations/:id', async (req, res) => {
 });
 
 // Update Status Endpoint
-app.put('/admin/vacations/:id', async (req, res) => {
+app.put('/admin/vacations/:id', checkAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
@@ -206,7 +279,7 @@ app.put('/admin/vacations/:id', async (req, res) => {
 // Export Endpoints (PDF)
 const PDFDocument = require('pdfkit');
 
-app.get('/admin/export/uploads', async (req, res) => {
+app.get('/admin/export/uploads', checkAuth, async (req, res) => {
     try {
         const result = await pool.query(`SELECT * FROM uploads ORDER BY upload_date DESC`);
         const items = result.rows;
@@ -230,6 +303,7 @@ app.get('/admin/export/uploads', async (req, res) => {
         doc.fontSize(12).font('Helvetica-Bold');
         doc.text('Fecha', colFecha, startY);
         doc.text('Nombre', colNombre, startY);
+        doc.text('Título', 280, startY); // Added title header
         doc.text('Email', colEmail, startY);
 
         doc.moveTo(50, startY + 15).lineTo(550, startY + 15).stroke();
@@ -246,7 +320,8 @@ app.get('/admin/export/uploads', async (req, res) => {
             }
 
             doc.text(new Date(item.upload_date).toLocaleDateString(), colFecha, currentY);
-            doc.text(item.name.substring(0, 30), colNombre, currentY); // Truncate name
+            doc.text(item.name.substring(0, 25), colNombre, currentY); // Reduced name width
+            doc.text((item.academic_title || '-').substring(0, 15), 280, currentY); // Added academic title
             doc.text(item.email, colEmail, currentY);
 
             currentY += 20;
@@ -258,7 +333,7 @@ app.get('/admin/export/uploads', async (req, res) => {
     }
 });
 
-app.get('/admin/export/vacations', async (req, res) => {
+app.get('/admin/export/vacations', checkAuth, async (req, res) => {
     try {
         const result = await pool.query(`SELECT * FROM vacations ORDER BY request_date DESC`);
         const items = result.rows;
