@@ -118,7 +118,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
         // Remove extension from original name as Cloudinary adds it based on format
-        const rawName = file.originalname.split('.').slice(0, -1).join('.');
+        const rawName = file.originalname.split('.').slice(0, -1).join('.').trim();
         const isPdf = file.mimetype === 'application/pdf';
 
         return {

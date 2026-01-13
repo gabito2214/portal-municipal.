@@ -41,6 +41,7 @@ function filterCVs() {
 }
 
 function renderCVs(data) {
+    const body = document.getElementById('cvs-body');
     body.innerHTML = data.map(item => `
         <tr>
             <td data-label="Fecha">${new Date(item.upload_date).toLocaleDateString()}</td>
